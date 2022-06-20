@@ -1,29 +1,27 @@
-import React, { useState } from "react";
+import React, { useReducer, useState } from "react";
+import createDataContext, {
+  Action,
+  BlogPost,
+  BlogpostAction,
+} from "./createDataContext";
 
-interface BlogPosts {
-  title: string;
-}
-
-interface BlogContext {
-  data: BlogPosts[];
-  addBlogPost: () => void;
-}
-
-export const BlogContext = React.createContext<Partial<BlogContext>>({});
-
-export const BlogProvider: React.FC = ({ children }) => {
-  const [blogPosts, setBlogPosts] = useState<BlogPosts[]>([]);
-
-  const addBlogPost = () => {
-    setBlogPosts([
-      ...blogPosts,
-      { title: `Blog post #${blogPosts.length + 1}` },
-    ]);
-  };
-
-  return (
-    <BlogContext.Provider value={{ data: blogPosts, addBlogPost }}>
-      {children}
-    </BlogContext.Provider>
-  );
+const blogReducer = (state: BlogPost[], action: Action) => {
+  switch (action.type) {
+    case BlogpostAction.ADD_BLOGPOST:
+      return [...state, { title: `Blog post #${state.length + 1}` }];
+    default:
+      return state;
+  }
 };
+
+const addBlogPost = (dispatch) => {
+  return () => {
+    dispatch({ type: BlogpostAction.ADD_BLOGPOST });
+  };
+};
+
+export const { BlogContext, BlogProvider } = createDataContext(
+  blogReducer,
+  { addBlogPost },
+  []
+);
